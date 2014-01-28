@@ -1,1 +1,1 @@
-web: python pipeline-notifier/main.py
+web: python pipeline_notifier/main.py
