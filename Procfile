@@ -1,1 +1,1 @@
-web: gunicorn hello:app
+web: python pipeline-notifier/main.py
