@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello():
-    return 'Hello Worlds!'
+    return 'Hello World!'
 
 def run_server():
     cherrypy.tree.graft(app, '/')
