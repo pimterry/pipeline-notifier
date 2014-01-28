@@ -44,4 +44,5 @@ class BuildStep:
                 callback(commit)
 
 class Commit:
-    pass
+    def __init__(self, name):
+        self.name = name

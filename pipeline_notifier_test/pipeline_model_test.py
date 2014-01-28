@@ -42,8 +42,8 @@ class PipelineTests(unittest.TestCase):
 class BuildStepTests(unittest.TestCase):
     def test_build_step_passes_calls_callbacks_for_successes(self):
         step = BuildStep("step1")
+        commit = Commit("1")
         callback = Mock()
-        commit = Commit()
 
         step.add_success_listener(callback)
         step.add_commit(commit)
@@ -53,8 +53,8 @@ class BuildStepTests(unittest.TestCase):
 
     def test_build_step_passes_calls_callbacks_for_failures(self):
         step = BuildStep("step1")
+        commit = Commit("1")
         callback = Mock()
-        commit = Commit()
 
         step.add_failure_listener(callback)
         step.add_commit(commit)
@@ -65,7 +65,7 @@ class BuildStepTests(unittest.TestCase):
     def test_build_step_doesnt_call_wrong_callbacks(self):
         step = BuildStep("step1")
         success_callback, failure_callback = Mock(), Mock()
-        commit1, commit2 = Commit(), Commit()
+        commit1, commit2 = Commit("1"), Commit("2")
 
         step.add_success_listener(success_callback)
         step.add_failure_listener(failure_callback)
@@ -76,3 +76,8 @@ class BuildStepTests(unittest.TestCase):
 
         failure_callback.assert_called_once_with(commit1)
         success_callback.assert_called_once_with(commit2)
+
+class CommitTests(unittest.TestCase):
+    def test_commit_name_is_saved(self):
+        commit = Commit("commit name")
+        self.assertEquals(commit.name, "commit name")
