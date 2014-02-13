@@ -20,6 +20,25 @@ class HipchatNotifierTests(unittest.TestCase):
 
         hipchatMock.assert_called_once_with(token="token123abc")
 
+    def test_success_sends_message_to_room(self, hipchatMock):
+        notifier = HipchatNotifier("token", 123)
+
+        notifier.announce_pipeline_success(Mock(), [Commit("commit")])
+
+        self.assert_one_message_posted(hipchatCallsTo(hipchatMock),
+                                       Matches(lambda m: m["parameters"]["room_id"] == 123))
+
+    def test_success_sends_message_describing_passed_commits(self, hipchatMock):
+        notifier = HipchatNotifier("token", 123)
+
+        notifier.announce_pipeline_success(Mock(), [Commit("good commit"), Commit("another commit")])
+
+        isExpectedMessage = lambda m: ("failed" not in m and
+                                       "good commit" in m and
+                                       "another commit" in m)
+        self.assert_one_message_posted(hipchatCallsTo(hipchatMock),
+                                    Matches(lambda m: isExpectedMessage(m["parameters"]["message"])))
+
     def test_failure_sends_message_to_room(self, hipchatMock):
         notifier = HipchatNotifier("token", 123)
 
