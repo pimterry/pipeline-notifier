@@ -48,7 +48,14 @@ class HipchatNotifierTests(unittest.TestCase):
         self.assert_one_message_posted(hipchatCallsTo(hipchatMock),
                                 Matches(lambda m: isExpectedMessage(m["parameters"]["message"])))
 
-    def assert_one_message_posted(self, hipchatCalls, matcher=Matches(lambda: True)):
+    def test_failure_sends_message_for_failed_builds_without_commits(self, hipchatMock):
+        notifier = HipchatNotifier("token", 123)
+
+        notifier.announce_step_failure(Mock(), [])
+
+        self.assert_one_message_posted(hipchatCallsTo(hipchatMock))
+
+    def assert_one_message_posted(self, hipchatCalls, matcher=Matches(lambda x: True)):
         self.assertEqual(1, len(hipchatCalls))
         call = hipchatCalls[0]
         args = dict(list(enumerate(call[0])) + list(call[1].items()))
