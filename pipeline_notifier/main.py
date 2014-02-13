@@ -1,12 +1,10 @@
 import os
 import cherrypy
+from .routes import setup_routes
 from flask import Flask
 
-app = Flask(__name__)
-
-@app.route('/')
-def hello():
-    return 'Hello World!'
+app = Flask("Pipeline Notifier")
+setup_routes(app, [])
 
 def run_server():
     cherrypy.tree.graft(app, '/')
