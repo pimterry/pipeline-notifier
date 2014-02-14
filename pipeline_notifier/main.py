@@ -1,6 +1,6 @@
 import os
 import cherrypy
-from .routes import setup_routes
+from pipeline_notifier.routes import setup_routes
 from flask import Flask
 
 app = Flask("Pipeline Notifier")
