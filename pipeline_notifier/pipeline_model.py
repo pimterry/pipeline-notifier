@@ -11,6 +11,13 @@ class Pipeline:
 
         steps[-1].add_success_listener(notifier.on_success)
 
+    @property
+    def status(self):
+        return {
+            "name": self.name,
+            "steps": [s.status for s in self._steps]
+        }
+
 class BuildStep:
     def __init__(self, name):
         self.name = name

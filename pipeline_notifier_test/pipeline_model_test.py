@@ -38,6 +38,22 @@ class PipelineTests(unittest.TestCase):
 
         notifier.on_failure.assert_called_once_with(commit)
 
+    def test_pipeline_status_describes_pipeline_name(self):
+        step1, notifier = Mock(**{"status": ""}), Mock()
+
+        pipeline = Pipeline("my first pipeline", [step1], notifier)
+
+        self.assertEqual(pipeline.status["name"], "my first pipeline")
+
+    def test_pipeline_status_describes_steps(self):
+        step1, step2, notifier = Mock(**{"status": "status 1"}), Mock(**{"status": "status 2"}), Mock()
+
+        pipeline = Pipeline("pipeline", [step1, step2], notifier)
+
+        self.assertEqual(len(pipeline.status["steps"]), 2)
+        self.assertEqual(pipeline.status["steps"][0], "status 1")
+        self.assertEqual(pipeline.status["steps"][1], "status 2")
+
 
 class BuildStepTests(unittest.TestCase):
     def test_build_step_passes_calls_callbacks_for_successes(self):
