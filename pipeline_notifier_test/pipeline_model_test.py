@@ -103,6 +103,14 @@ class BuildStepTests(unittest.TestCase):
 
         self.assertEqual(step.status["waiting"], ["Another commit"])
 
+    def test_step_status_lists_in_progress_commits(self):
+        pass
+
+    def test_step_status_includes_step_name(self):
+        step = BuildStep("my build step")
+
+        self.assertEqual(step.status["name"], "my build step")
+
 class CommitTests(unittest.TestCase):
     def test_commit_name_is_saved(self):
         commit = Commit("commit name")

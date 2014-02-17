@@ -53,6 +53,7 @@ class BuildStep:
     @property
     def status(self):
         return {
+            "name": self.name,
             "waiting": [c.name for c in self.waiting_commits]
         }
 
