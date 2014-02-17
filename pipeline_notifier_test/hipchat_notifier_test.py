@@ -4,14 +4,7 @@ from pipeline_notifier.pipeline_model import Commit
 import unittest
 from unittest.mock import patch, Mock
 
-class Matches:
-    def __init__(self, matcher):
-        self.matcher = matcher
-    def __eq__(self, other):
-        return self.matcher(other)
-
-def hipchatCallsTo(hipchatMock):
-    return hipchatMock.return_value.method.call_args_list
+from pipeline_notifier_test.test_utils import *
 
 @patch("hipchat.HipChat")
 class HipchatNotifierTests(unittest.TestCase):
