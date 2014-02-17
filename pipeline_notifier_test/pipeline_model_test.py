@@ -21,22 +21,22 @@ class PipelineTests(unittest.TestCase):
     def test_a_final_successful_step_causes_a_notification(self):
         step1, step2, commit, notifier = Mock(), Mock(), Mock(), Mock()
 
-        Pipeline("pipeline", [step1, step2], notifier)
+        pipeline = Pipeline("pipeline", [step1, step2], notifier)
 
         success_callback = step2.add_success_listener.call_args[0][0]
         success_callback(commit)
 
-        notifier.on_success.assert_called_once_with(commit)
+        notifier.announce_pipeline_success.assert_called_once_with(pipeline, commit)
 
     def test_a_failing_step_causes_a_notification(self):
         step1, step2, commit, notifier = Mock(), Mock(), Mock(), Mock()
 
-        Pipeline("pipeline", [step1, step2], notifier)
+        pipeline = Pipeline("pipeline", [step1, step2], notifier)
 
         failure_callback = step1.add_failure_listener.call_args[0][0]
         failure_callback(commit)
 
-        notifier.on_failure.assert_called_once_with(commit)
+        notifier.announce_step_failure.assert_called_once_with(pipeline, commit)
 
     def test_pipeline_status_describes_pipeline_name(self):
         step1, notifier = Mock(**{"status": ""}), Mock()

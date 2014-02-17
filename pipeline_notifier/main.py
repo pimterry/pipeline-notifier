@@ -1,12 +1,26 @@
 import os
 import cherrypy
+from flask import Flask, json
+
 from pipeline_notifier.routes import setup_routes
-from flask import Flask
+from pipeline_notifier.pipeline_model import Pipeline, BuildStep
+from pipeline_notifier.hipchat_notifier import HipchatNotifier
 
 def build_app():
     app = Flask("Pipeline Notifier")
-    setup_routes(app, [], None)
+
+    pipelines_config = json.loads(os.environ["PIPELINE_NOTIFIER_PIPELINES"])
+    notifier = HipchatNotifier("", 123)
+    pipelines = build_pipelines(pipelines_config, notifier)
+
+    setup_routes(app, pipelines, None)
     return app
+
+def build_pipelines(pipelines_config, notifier):
+    return [Pipeline(config["name"],
+                     [BuildStep(step) for step in config["steps"]],
+                     notifier)
+            for config in pipelines_config]
 
 def run_server(app):
     cherrypy.tree.graft(app, '/')

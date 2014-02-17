@@ -4,12 +4,13 @@ class Pipeline:
         self._steps = steps
 
         for step in steps:
-            step.add_failure_listener(notifier.on_failure)
+            step.add_failure_listener(lambda commits: notifier.announce_step_failure(self, commits))
 
         for step, nextStep in zip(steps, steps[1:]):
             step.add_success_listener(nextStep.add_commit)
 
-        steps[-1].add_success_listener(notifier.on_success)
+        if len(steps) > 0:
+            steps[-1].add_success_listener(lambda commits: notifier.announce_pipeline_success(self, commits))
 
     @property
     def status(self):
