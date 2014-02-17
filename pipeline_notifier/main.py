@@ -4,7 +4,7 @@ from pipeline_notifier.routes import setup_routes
 from flask import Flask
 
 app = Flask("Pipeline Notifier")
-setup_routes(app, [])
+setup_routes(app, [], None)
 
 def run_server():
     cherrypy.tree.graft(app, '/')

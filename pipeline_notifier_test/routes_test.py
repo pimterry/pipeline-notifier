@@ -1,16 +1,29 @@
 import unittest
 from unittest.mock import Mock
+from flask import json
+
 from pipeline_notifier.routes import setup_routes
 
 class RoutesTests(unittest.TestCase):
     def setUp(self):
-        self.pipeline = Mock()
+        self.pipelineA, self.pipelineB = Mock(**{"status": ""}), Mock(**{"status": ""})
+        self.notifier = Mock()
         self.app = AppMock()
-        setup_routes(self.app, [self.pipeline])
+        setup_routes(self.app, [self.pipelineA, self.pipelineB], self.notifier)
 
-    def test_root_route_returns_something(self):
-        result = self.app['/']()
-        self.assertNotEqual(result, None)
+    def test_status_route_returns_ok_initially(self):
+        statusResult = self.app['/status']()
+        self.assertEqual("ok", json.loads(statusResult)["status"])
+
+    def test_status_route_returns_pipeline_details(self):
+        self.pipelineA.status = {"steps": [1], "commits": []}
+        self.pipelineB.status = {"steps": [2, 3, 4], "commits": []}
+
+        pipelineStatuses = json.loads(self.app['/status']())["pipelines"]
+
+        self.assertEqual(2, len(pipelineStatuses))
+        self.assertEqual(self.pipelineA.status, pipelineStatuses[0])
+        self.assertEqual(self.pipelineB.status, pipelineStatuses[1])
 
 class AppMock:
     """
