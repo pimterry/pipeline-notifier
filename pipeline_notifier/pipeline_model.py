@@ -50,6 +50,12 @@ class BuildStep:
             for callback in self.failure_callbacks:
                 callback(commit)
 
+    @property
+    def status(self):
+        return {
+            "waiting": [c.name for c in self.waiting_commits]
+        }
+
 class Commit:
     def __init__(self, name):
         self.name = name

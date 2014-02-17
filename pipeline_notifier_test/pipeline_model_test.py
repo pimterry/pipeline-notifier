@@ -93,6 +93,16 @@ class BuildStepTests(unittest.TestCase):
         failure_callback.assert_called_once_with(commit1)
         success_callback.assert_called_once_with(commit2)
 
+    def test_step_status_lists_waiting_commits(self):
+        step = BuildStep("a step")
+        commit1, commit2 = Commit("A commit"), Commit("Another commit")
+
+        step.add_commit(commit1)
+        step.succeed()
+        step.add_commit(commit2)
+
+        self.assertEqual(step.status["waiting"], ["Another commit"])
+
 class CommitTests(unittest.TestCase):
     def test_commit_name_is_saved(self):
         commit = Commit("commit name")
