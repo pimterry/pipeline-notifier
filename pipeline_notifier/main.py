@@ -3,10 +3,12 @@ import cherrypy
 from pipeline_notifier.routes import setup_routes
 from flask import Flask
 
-app = Flask("Pipeline Notifier")
-setup_routes(app, [], None)
+def build_app():
+    app = Flask("Pipeline Notifier")
+    setup_routes(app, [], None)
+    return app
 
-def run_server():
+def run_server(app):
     cherrypy.tree.graft(app, '/')
 
     cherrypy.config.update({
@@ -20,4 +22,5 @@ def run_server():
     cherrypy.engine.block()
 
 if __name__ == '__main__':
-    run_server()
+    app = build_app()
+    run_server(app)
