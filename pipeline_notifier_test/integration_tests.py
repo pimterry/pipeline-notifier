@@ -23,11 +23,11 @@ class IntegrationTests(unittest.TestCase):
         status = json.loads(result.data)
         self.assertEqual(status["pipelines"], [
             {"name": "Pipeline A", "steps": [
-                {"name": "Step 1", "waiting": []}
+                {"name": "Step 1", "waiting": [], "in-progress": []}
             ]},
             {"name": "Pipeline B", "steps": [
-                {"name": "Step 2", "waiting": []},
-                {"name": "Step 3", "waiting": []}
+                {"name": "Step 2", "waiting": [], "in-progress": []},
+                {"name": "Step 3", "waiting": [], "in-progress": []}
             ]}
         ])
 

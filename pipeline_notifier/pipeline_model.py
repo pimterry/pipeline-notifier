@@ -19,10 +19,14 @@ class Pipeline:
             "steps": [s.status for s in self._steps]
         }
 
+# TODO: Actively deal with concurrency here (just wrap steps with locking? message passing?)
 class BuildStep:
     def __init__(self, name):
         self.name = name
+
         self.waiting_commits = []
+        self.in_progress_commits = []
+
         self.success_callbacks = []
         self.failure_callbacks = []
 
@@ -35,17 +39,21 @@ class BuildStep:
     def add_commit(self, commit):
         self.waiting_commits.append(commit)
 
-    def succeed(self):
-        tested_commits = self.waiting_commits[:]
+    def start(self):
+        self.in_progress_commits.extend(self.waiting_commits)
         self.waiting_commits.clear()
+
+    def succeed(self):
+        tested_commits = self.in_progress_commits[:]
+        self.in_progress_commits.clear()
 
         for commit in tested_commits:
             for callback in self.success_callbacks:
                 callback(commit)
 
     def fail(self):
-        tested_commits = self.waiting_commits[:]
-        self.waiting_commits.clear()
+        tested_commits = self.in_progress_commits[:]
+        self.in_progress_commits.clear()
 
         for commit in tested_commits:
             for callback in self.failure_callbacks:
@@ -55,7 +63,8 @@ class BuildStep:
     def status(self):
         return {
             "name": self.name,
-            "waiting": [c.name for c in self.waiting_commits]
+            "waiting": [c.name for c in self.waiting_commits],
+            "in-progress": [c.name for c in self.in_progress_commits]
         }
 
 class Commit:
