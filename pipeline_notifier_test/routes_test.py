@@ -7,9 +7,8 @@ from pipeline_notifier.routes import setup_routes
 class RoutesTests(unittest.TestCase):
     def setUp(self):
         self.pipelineA, self.pipelineB = Mock(**{"status": ""}), Mock(**{"status": ""})
-        self.notifier = Mock()
         self.app = AppMock()
-        setup_routes(self.app, [self.pipelineA, self.pipelineB], self.notifier)
+        setup_routes(self.app, [self.pipelineA, self.pipelineB])
 
     def test_status_route_returns_ok_initially(self):
         statusResult = self.app['/status']()

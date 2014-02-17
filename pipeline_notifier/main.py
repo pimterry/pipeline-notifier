@@ -13,7 +13,7 @@ def build_app():
     notifier = HipchatNotifier("", 123)
     pipelines = build_pipelines(pipelines_config, notifier)
 
-    setup_routes(app, pipelines, None)
+    setup_routes(app, pipelines)
     return app
 
 def build_pipelines(pipelines_config, notifier):
