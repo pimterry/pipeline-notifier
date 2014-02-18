@@ -7,30 +7,34 @@ from pipeline_notifier.routes import setup_routes
 @patch("flask.request")
 class RoutesTests(unittest.TestCase):
     def setUp(self):
-        self.pipelineA, self.pipelineB = Mock(**{"status": ""}), Mock(**{"status": ""})
+        self.pipeline = Mock(**{"status": ""})
         self.patchBitbucketNotifications()
+        self.patchJenkinsNotifications()
 
         self.app = AppMock()
-        setup_routes(self.app, [self.pipelineA, self.pipelineB])
+        setup_routes(self.app, [self.pipeline])
 
     def patchBitbucketNotifications(self):
         bitbucketPatcher = patch("pipeline_notifier.incoming_notifications.BitbucketNotification")
         self.bitbucketNotificationMock = bitbucketPatcher.start()
         self.addCleanup(bitbucketPatcher.stop)
 
+    def patchJenkinsNotifications(self):
+        jenkinsPatcher = patch("pipeline_notifier.incoming_notifications.JenkinsNotification")
+        self.jenkinsNotificationMock = jenkinsPatcher.start()
+        self.addCleanup(jenkinsPatcher.stop)
+
     def test_status_route_returns_ok_initially(self, requestMock):
         statusResult = self.app['/status']()
         self.assertEqual("ok", json.loads(statusResult)["status"])
 
     def test_status_route_returns_pipeline_details(self, requestMock):
-        self.pipelineA.status = {"steps": [1], "commits": []}
-        self.pipelineB.status = {"steps": [2, 3, 4], "commits": []}
+        self.pipeline.status = {"steps": [1, 2, 3], "commits": []}
 
         pipelineStatuses = json.loads(self.app['/status']())["pipelines"]
 
-        self.assertEqual(2, len(pipelineStatuses))
-        self.assertEqual(self.pipelineA.status, pipelineStatuses[0])
-        self.assertEqual(self.pipelineB.status, pipelineStatuses[1])
+        self.assertEqual(1, len(pipelineStatuses))
+        self.assertEqual(self.pipeline.status, pipelineStatuses[0])
 
     def test_bitbucket_route_updates_pipeline(self, requestMock):
         requestMock.form.__getitem__.return_value = '{"commits": [1, 2, 3]}'
@@ -39,7 +43,19 @@ class RoutesTests(unittest.TestCase):
         self.app['/bitbucket']()
 
         self.bitbucketNotificationMock.assert_called_once_with({"commits": [1, 2, 3]})
-        self.pipelineA.add_commit.assert_called_once_with("a commit")
+        bitbucketNotification = self.bitbucketNotificationMock.return_value
+        self.assertEquals(bitbucketNotification.update_pipeline.call_count, 1)
+        
+    def test_jenkins_route_starts_build_steps(self, requestMock):
+        requestMock.data = '{"step": "a step"}'
+        self.jenkinsNotificationMock.return_value.step_name = "step name"
+        self.jenkinsNotificationMock.return_value.step_status = "started"
+
+        self.app['/jenkins']()
+
+        self.jenkinsNotificationMock.assert_called_once_with({"step": "a step"})
+        jenkinsNotification = self.jenkinsNotificationMock.return_value
+        self.assertEquals(jenkinsNotification.update_pipeline.call_count, 1)
 
 class AppMock:
     """

@@ -16,5 +16,10 @@ def setup_routes(app, pipelines):
     def bitbucket():
         notification = incoming_notifications.BitbucketNotification(json.loads(flask.request.form['payload']))
         for pipeline in pipelines:
-            for commit in notification.commits:
-                pipeline.add_commit(commit)
+            notification.update_pipeline(pipeline)
+            
+    @app.route('/jenkins', methods=['POST'])
+    def jenkins():
+        notification = incoming_notifications.JenkinsNotification(json.loads(flask.request.data))
+        for pipeline in pipelines:
+            notification.update_pipeline(pipeline)
