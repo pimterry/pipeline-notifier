@@ -19,6 +19,9 @@ class Pipeline:
             "steps": [s.status for s in self._steps]
         }
 
+    def add_commit(self, commit):
+        self._steps[0].add_commit(commit)
+
 # TODO: Actively deal with concurrency here (just wrap steps with locking? message passing?)
 class BuildStep:
     def __init__(self, name):

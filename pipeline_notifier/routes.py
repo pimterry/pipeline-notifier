@@ -1,5 +1,6 @@
 from flask import json
-from pipeline_notifier.pipeline_model import Pipeline
+import flask
+from pipeline_notifier import incoming_notifications
 
 def setup_routes(app, pipelines):
     @app.route('/status')
@@ -10,3 +11,10 @@ def setup_routes(app, pipelines):
                 p.status for p in pipelines
             ]
         })
+
+    @app.route('/bitbucket', methods=['POST'])
+    def bitbucket():
+        notification = incoming_notifications.BitbucketNotification(json.loads(flask.request.form['payload']))
+        for pipeline in pipelines:
+            for commit in notification.commits:
+                pipeline.add_commit(commit)

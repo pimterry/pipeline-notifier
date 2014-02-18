@@ -56,6 +56,16 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(pipeline.status["steps"][0], "status 1")
         self.assertEqual(pipeline.status["steps"][1], "status 2")
 
+    def test_adding_commit_to_pipeline_adds_to_the_first_step(self):
+        step1, step2, notifier = Mock(), Mock(), Mock()
+        commit1 = MockCommit("commit1")
+
+        pipeline = Pipeline("pipeline", [step1, step2], notifier)
+
+        pipeline.add_commit(commit1)
+        step1.add_commit.assert_called_once_with(commit1)
+        self.assertEquals(0, step2.add_commit.call_count)
+
 
 class BuildStepTests(unittest.TestCase):
     def test_build_step_passes_call_success_callbacks(self):
