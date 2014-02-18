@@ -63,10 +63,21 @@ class BuildStep:
     def status(self):
         return {
             "name": self.name,
-            "waiting": [c.name for c in self.waiting_commits],
-            "in-progress": [c.name for c in self.in_progress_commits]
+            "waiting": [c.status for c in self.waiting_commits],
+            "in-progress": [c.status for c in self.in_progress_commits]
         }
 
 class Commit:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, author, branch, message, hash):
+        self.author = author
+        self.branch = branch
+        self.message = message
+        self.hash = hash
+
+    @property
+    def description(self):
+        return "%s on '%s': %s" % (self.author, self.branch, self.message.split("\n")[0])
+
+    @property
+    def status(self):
+        return "%s by '%s'" % (self.hash, self.author)

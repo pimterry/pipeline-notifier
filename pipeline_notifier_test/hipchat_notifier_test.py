@@ -1,5 +1,4 @@
 from pipeline_notifier.hipchat_notifier import HipchatNotifier
-from pipeline_notifier.pipeline_model import Commit
 
 import unittest
 from unittest.mock import patch, Mock
@@ -16,7 +15,7 @@ class HipchatNotifierTests(unittest.TestCase):
     def test_success_sends_message_to_room(self, hipchatMock):
         notifier = HipchatNotifier("token", 123)
 
-        notifier.announce_pipeline_success(Mock(), [Commit("commit")])
+        notifier.announce_pipeline_success(Mock(name="pipeline"), [MockCommit("commit")])
 
         self.assert_one_message_posted(hipchatCallsTo(hipchatMock),
                                        Matches(lambda m: m["parameters"]["room_id"] == 123))
@@ -24,18 +23,19 @@ class HipchatNotifierTests(unittest.TestCase):
     def test_success_sends_message_describing_passed_commits(self, hipchatMock):
         notifier = HipchatNotifier("token", 123)
 
-        notifier.announce_pipeline_success(Mock(), [Commit("good commit"), Commit("another commit")])
+        notifier.announce_pipeline_success(Mock(name="pipeline"),
+                                           [MockCommit("commit1"), MockCommit("commit2")])
 
         isExpectedMessage = lambda m: ("failed" not in m and
-                                       "good commit" in m and
-                                       "another commit" in m)
+                                       "commit1" in m and
+                                       "commit2" in m)
         self.assert_one_message_posted(hipchatCallsTo(hipchatMock),
                                     Matches(lambda m: isExpectedMessage(m["parameters"]["message"])))
 
     def test_failure_sends_message_to_room(self, hipchatMock):
         notifier = HipchatNotifier("token", 123)
 
-        notifier.announce_step_failure(Mock(), [Commit("commit")])
+        notifier.announce_step_failure(Mock(), [MockCommit("commit")])
 
         self.assert_one_message_posted(hipchatCallsTo(hipchatMock),
                                     Matches(lambda m: m["parameters"]["room_id"] == 123))
@@ -43,7 +43,7 @@ class HipchatNotifierTests(unittest.TestCase):
     def test_failure_sends_message_describing_failed_commits(self, hipchatMock):
         notifier = HipchatNotifier("token", 123)
 
-        notifier.announce_step_failure(Mock(), [Commit("commit 1"), Commit("commit 2")])
+        notifier.announce_step_failure(Mock(), [MockCommit("commit 1"), MockCommit("commit 2")])
 
         isExpectedMessage = lambda m: "failed" in m and "commit 1" in m and "commit 2" in m
         self.assert_one_message_posted(hipchatCallsTo(hipchatMock),
@@ -54,7 +54,7 @@ class HipchatNotifierTests(unittest.TestCase):
         buildStep = Mock()
         buildStep.configure_mock(name="Step name")
 
-        notifier.announce_step_failure(buildStep, [Commit("commit 1")])
+        notifier.announce_step_failure(buildStep, [MockCommit("commit 1")])
 
         isExpectedMessage = lambda m: "failed" in m and buildStep.name in m
         self.assert_one_message_posted(hipchatCallsTo(hipchatMock),

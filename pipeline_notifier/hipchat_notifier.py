@@ -10,7 +10,7 @@ class HipchatNotifier:
             'room_id': self.room_id,
             'from': 'Pipeline Notifier',
             'message': 'Build completed, for commits: %s' %
-                       (', '.join(c.name for c in commits))
+                       (', '.join(c.description for c in commits))
         })
 
     def announce_step_failure(self, step, commits):
@@ -18,5 +18,5 @@ class HipchatNotifier:
             'room_id': self.room_id,
             'from': 'Pipeline Notifier',
             'message': 'Build step %s failed, for commits: %s' %
-                        (step.name, ', '.join(c.name for c in commits))
+                        (step.name, ', '.join(c.description for c in commits))
         })

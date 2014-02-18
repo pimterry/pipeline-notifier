@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import Mock, call
+
 from pipeline_notifier.pipeline_model import Pipeline, BuildStep, Commit
+from pipeline_notifier_test.test_utils import *
 
 class PipelineTests(unittest.TestCase):
     def test_callbacks_are_set_on_build_steps(self):
@@ -57,7 +59,7 @@ class PipelineTests(unittest.TestCase):
 
 class BuildStepTests(unittest.TestCase):
     def test_build_step_passes_call_success_callbacks(self):
-        step, commit, callback = BuildStep("step1"), Commit("1"), Mock()
+        step, commit, callback = BuildStep("step1"), MockCommit("1"), Mock()
         step.add_success_listener(callback)
 
         step.add_commit(commit)
@@ -67,7 +69,7 @@ class BuildStepTests(unittest.TestCase):
         callback.assert_called_once_with(commit)
 
     def test_build_step_failures_call_failure_callbacks(self):
-        step, commit, callback = BuildStep("step1"), Commit("1"), Mock()
+        step, commit, callback = BuildStep("step1"), MockCommit("1"), Mock()
         step.add_failure_listener(callback)
 
         step.add_commit(commit)
@@ -77,7 +79,7 @@ class BuildStepTests(unittest.TestCase):
         callback.assert_called_once_with(commit)
 
     def test_build_steps_only_passes_commits_present_when_the_step_was_started(self):
-        step, commit1, commit2, callback = BuildStep("step1"), Commit("1"), Commit("2"), Mock()
+        step, commit1, commit2, callback = BuildStep("step1"), MockCommit("1"), MockCommit("2"), Mock()
         step.add_success_listener(callback)
 
         step.add_commit(commit1)
@@ -88,7 +90,7 @@ class BuildStepTests(unittest.TestCase):
         callback.assert_called_once_with(commit1)
 
     def test_build_steps_only_fails_commits_present_when_the_step_was_started(self):
-        step, commit1, commit2, callback = BuildStep("step1"), Commit("1"), Commit("2"), Mock()
+        step, commit1, commit2, callback = BuildStep("step1"), MockCommit("1"), MockCommit("2"), Mock()
         step.add_failure_listener(callback)
 
         step.add_commit(commit1)
@@ -100,7 +102,7 @@ class BuildStepTests(unittest.TestCase):
 
     def test_build_step_doesnt_call_wrong_callbacks(self):
         step = BuildStep("step1")
-        commit1, commit2 = Commit("1"), Commit("2")
+        commit1, commit2 = MockCommit("1"), MockCommit("2")
         success_callback, failure_callback = Mock(), Mock()
         step.add_success_listener(success_callback)
         step.add_failure_listener(failure_callback)
@@ -118,24 +120,24 @@ class BuildStepTests(unittest.TestCase):
 
     def test_step_status_lists_waiting_commits(self):
         step = BuildStep("a step")
-        commit1, commit2 = Commit("A commit"), Commit("Another commit")
+        commit1, commit2 = Mock(**{"status":"commit 1"}), Mock(**{"status":"commit 2"})
 
         step.add_commit(commit1)
         step.start()
         step.succeed()
         step.add_commit(commit2)
 
-        self.assertEqual(step.status["waiting"], ["Another commit"])
+        self.assertEqual(step.status["waiting"], ["commit 2"])
 
     def test_step_status_lists_in_progress_commits(self):
         step = BuildStep("a step")
-        commit1 = Commit("A commit")
+        commit1 = Mock(**{"status": "commit status"})
 
         step.add_commit(commit1)
         step.start()
 
         self.assertEqual(step.status["waiting"], [])
-        self.assertEqual(step.status["in-progress"], ["A commit"])
+        self.assertEqual(step.status["in-progress"], ["commit status"])
 
     def test_step_status_includes_step_name(self):
         step = BuildStep("my build step")
@@ -144,5 +146,18 @@ class BuildStepTests(unittest.TestCase):
 
 class CommitTests(unittest.TestCase):
     def test_commit_name_is_saved(self):
-        commit = Commit("commit name")
-        self.assertEquals(commit.name, "commit name")
+        commit = Commit("author", "branch", "message", "hash")
+        self.assertEquals(commit.author, "author")
+        self.assertEquals(commit.branch, "branch")
+        self.assertEquals(commit.message, "message")
+        self.assertEquals(commit.hash, "hash")
+
+    def test_commit_description_contains_user__branch_and_short_message(self):
+        commit = Commit("A User", "master", "My Commit Message\nSome more message", "123qwe")
+
+        self.assertEquals(commit.description, "A User on 'master': My Commit Message")
+
+    def test_commit_status_contains_user_and_hash(self):
+        commit = Commit("A User", "master", "My Commit Message\nSome more message", "123qwe")
+
+        self.assertEquals(commit.status, "123qwe by 'A User'")
