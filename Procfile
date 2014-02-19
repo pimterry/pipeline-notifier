@@ -1,1 +1,1 @@
-web: python pipeline_notifier/main.py
+web: newrelic-admin run-program python pipeline_notifier/main.py
