@@ -42,13 +42,27 @@ class IntegrationTests(unittest.TestCase):
         self.announceStepStart("Step 1", client)
         self.announceStepSuccess("Step 1", client)
 
-        self.assertHipchatNotificationSent(Matches(lambda message: "completed" in message and
-                                                                   "failed" not in message))
+        self.assertOneHipchatNotificationSent(Matches(lambda message: "completed" in message and
+                                                                      "failed" not in message))
+
+    def test_two_step_pipeline_notifies_final_successes(self):
+        client = self.buildClient({"PIPELINE_NOTIFIER_PIPELINES": json.dumps([
+            {"name": "Pipeline", "steps": ["Step 1", "Step 2"]},
+            ])})
+
+        self.announceCommit(client)
+        self.announceStepStart("Step 1", client)
+        self.announceStepSuccess("Step 1", client)
+        self.announceStepStart("Step 2", client)
+        self.announceStepSuccess("Step 2", client)
+
+        self.assertOneHipchatNotificationSent(Matches(lambda message: "completed" in message and
+                                                                      "failed" not in message))
 
     def getHipchatNotificationsSent(self):
         return [c for c in self.hipchatMock.return_value.method.call_args_list]
 
-    def assertHipchatNotificationSent(self, matcher = Matches(lambda m: True)):
+    def assertOneHipchatNotificationSent(self, matcher = Matches(lambda m: True)):
         self.hipchatMock.assert_called_once_with(token=self.hipchat_token)
 
         calls = hipchatCallsTo(self.hipchatMock)

@@ -17,8 +17,10 @@ class PipelineTests(unittest.TestCase):
         step1, step2, notifier = Mock(), Mock(), Mock()
 
         Pipeline("pipeline", [step1, step2], notifier)
+        success_callback = step1.add_success_listener.call_args[0][0]
+        success_callback([1, 2, 3])
 
-        self.assertEquals(step1.add_success_listener.mock_calls[0], call(step2.add_commit))
+        step2.add_commit.assert_has_calls([call(1), call(2), call(3)])
 
     def test_a_final_successful_step_causes_a_notification(self):
         step1, step2, commit, notifier = Mock(), Mock(), Mock(), Mock()

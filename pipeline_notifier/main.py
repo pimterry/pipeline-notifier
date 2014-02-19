@@ -12,6 +12,7 @@ def build_app():
     pipelines_config = json.loads(os.environ["PIPELINE_NOTIFIER_PIPELINES"])
     hipchat_token = os.environ["PIPELINE_NOTIFIER_HIPCHAT_TOKEN"]
     hipchat_room = os.environ["PIPELINE_NOTIFIER_HIPCHAT_ROOM"]
+
     notifier = HipchatNotifier(hipchat_token, hipchat_room)
     pipelines = build_pipelines(pipelines_config, notifier)
 
