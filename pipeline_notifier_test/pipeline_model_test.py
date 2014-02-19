@@ -109,24 +109,26 @@ class PipelineTests(unittest.TestCase):
 
 class BuildStepTests(unittest.TestCase):
     def test_build_step_passes_call_success_callbacks(self):
-        step, commit, callback = BuildStep("step1"), MockCommit("1"), Mock()
+        step, commit1, commit2, callback = BuildStep("step1"), MockCommit("1"), MockCommit("2"), Mock()
         step.add_success_listener(callback)
 
-        step.add_commit(commit)
+        step.add_commit(commit1)
+        step.add_commit(commit2)
         step.start()
         step.succeed()
 
-        callback.assert_called_once_with(commit)
+        callback.assert_called_once_with([commit1, commit2])
 
     def test_build_step_failures_call_failure_callbacks(self):
-        step, commit, callback = BuildStep("step1"), MockCommit("1"), Mock()
+        step, commit1, commit2, callback = BuildStep("step1"), MockCommit("1"), MockCommit("2"), Mock()
         step.add_failure_listener(callback)
 
-        step.add_commit(commit)
+        step.add_commit(commit1)
+        step.add_commit(commit2)
         step.start()
         step.fail()
 
-        callback.assert_called_once_with(commit)
+        callback.assert_called_once_with([commit1, commit2])
 
     def test_build_steps_only_passes_commits_present_when_the_step_was_started(self):
         step, commit1, commit2, callback = BuildStep("step1"), MockCommit("1"), MockCommit("2"), Mock()
@@ -137,7 +139,7 @@ class BuildStepTests(unittest.TestCase):
         step.add_commit(commit2)
         step.succeed()
 
-        callback.assert_called_once_with(commit1)
+        callback.assert_called_once_with([commit1])
 
     def test_build_steps_only_fails_commits_present_when_the_step_was_started(self):
         step, commit1, commit2, callback = BuildStep("step1"), MockCommit("1"), MockCommit("2"), Mock()
@@ -148,7 +150,7 @@ class BuildStepTests(unittest.TestCase):
         step.add_commit(commit2)
         step.fail()
 
-        callback.assert_called_once_with(commit1)
+        callback.assert_called_once_with([commit1])
 
     def test_build_step_doesnt_call_wrong_callbacks(self):
         step = BuildStep("step1")
@@ -165,8 +167,8 @@ class BuildStepTests(unittest.TestCase):
         step.start()
         step.succeed()
 
-        failure_callback.assert_called_once_with(commit1)
-        success_callback.assert_called_once_with(commit2)
+        failure_callback.assert_called_once_with([commit1])
+        success_callback.assert_called_once_with([commit2])
 
     def test_step_status_lists_waiting_commits(self):
         step = BuildStep("a step")

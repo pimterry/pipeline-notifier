@@ -33,7 +33,6 @@ class IntegrationTests(unittest.TestCase):
             ]}
         ])
 
-    @unittest.skip("Commit & build notifications not yet implemented")
     def test_single_step_pipeline_notifies_successes(self):
         client = self.buildClient({"PIPELINE_NOTIFIER_PIPELINES": json.dumps([
             {"name": "Pipeline", "steps": ["Step 1"]},
@@ -74,6 +73,8 @@ class IntegrationTests(unittest.TestCase):
         self.patchEnvWithMock(defaultEnv)
         self.patchHipchatWithMock()
         app = build_app()
+
+        app.testing = True
         return app.test_client()
 
     def patchEnvWithMock(self, envMock):
