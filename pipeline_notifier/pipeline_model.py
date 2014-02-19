@@ -22,6 +22,18 @@ class Pipeline:
     def add_commit(self, commit):
         self._steps[0].add_commit(commit)
 
+    def start_step(self, step_name):
+        for step in (step for step in self._steps if step.name == step_name):
+            step.start()
+
+    def pass_step(self, step_name):
+        for step in (step for step in self._steps if step.name == step_name):
+            step.succeed()
+
+    def fail_step(self, step_name):
+        for step in (step for step in self._steps if step.name == step_name):
+            step.fail()
+
 # TODO: Actively deal with concurrency here (just wrap steps with locking? message passing?)
 class BuildStep:
     def __init__(self, name):

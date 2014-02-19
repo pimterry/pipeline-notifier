@@ -66,6 +66,46 @@ class PipelineTests(unittest.TestCase):
         step1.add_commit.assert_called_once_with(commit1)
         self.assertEquals(0, step2.add_commit.call_count)
 
+    def test_starting_steps_starts_the_matching_step(self):
+        step1, step2, notifier = MockStep("step1"), MockStep("step2"), Mock()
+
+        pipeline = Pipeline("pipeline", [step1, step2], notifier)
+        pipeline.start_step("step1")
+
+        self.assertEqual(step1.start.call_count, 1)
+        self.assertEqual(step2.start.call_count, 0)
+
+    def test_passing_steps_passes_the_matching_step(self):
+        step1, step2, notifier = MockStep("step1"), MockStep("step2"), Mock()
+
+        pipeline = Pipeline("pipeline", [step1, step2], notifier)
+        pipeline.pass_step("step2")
+
+        self.assertEqual(step1.succeed.call_count, 0)
+        self.assertEqual(step2.succeed.call_count, 1)
+
+    def test_failing_steps_fails_the_matching_step(self):
+        step1, step2, notifier = MockStep("step1"), MockStep("step2"), Mock()
+
+        pipeline = Pipeline("pipeline", [step1, step2], notifier)
+        pipeline.fail_step("step1")
+
+        self.assertEqual(step1.fail.call_count, 1)
+        self.assertEqual(step2.fail.call_count, 0)
+
+    def test_starting_passing_and_failing_steps_do_nothing_if_no_step_is_matched(self):
+        step1, step2, notifier = MockStep("step1"), MockStep("step2"), Mock()
+
+        pipeline = Pipeline("pipeline", [step1, step2], notifier)
+        pipeline.start_step("step3")
+
+        self.assertEqual(step1.start.call_count, 0)
+        self.assertEqual(step1.succeed.call_count, 0)
+        self.assertEqual(step1.fail.call_count, 0)
+        self.assertEqual(step2.start.call_count, 0)
+        self.assertEqual(step2.succeed.call_count, 0)
+        self.assertEqual(step2.fail.call_count, 0)
+
 
 class BuildStepTests(unittest.TestCase):
     def test_build_step_passes_call_success_callbacks(self):

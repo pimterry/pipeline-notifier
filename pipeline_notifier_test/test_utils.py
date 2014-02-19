@@ -11,3 +11,8 @@ def hipchatCallsTo(hipchatMock):
 
 def MockCommit(description):
     return Mock(**{"description": description})
+
+def MockStep(name):
+    step = Mock(name=name)
+    step.configure_mock(name=name)
+    return step
