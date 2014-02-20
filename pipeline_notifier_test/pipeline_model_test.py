@@ -40,7 +40,7 @@ class PipelineTests(unittest.TestCase):
         failure_callback = step1.add_failure_listener.call_args[0][0]
         failure_callback(commit)
 
-        notifier.announce_step_failure.assert_called_once_with(pipeline, commit)
+        notifier.announce_step_failure.assert_called_once_with(step1, commit)
 
     def test_pipeline_status_describes_pipeline_name(self):
         step1, notifier = Mock(**{"status": ""}), Mock()

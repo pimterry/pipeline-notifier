@@ -4,7 +4,7 @@ class Pipeline:
         self._steps = steps
 
         for step in steps:
-            step.add_failure_listener(lambda commits: notifier.announce_step_failure(self, commits))
+            step.add_failure_listener(lambda commits: notifier.announce_step_failure(step, commits))
 
         for step, nextStep in zip(steps, steps[1:]):
             step.add_success_listener(lambda commits: [nextStep.add_commit(c) for c in commits])
