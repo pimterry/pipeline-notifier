@@ -20,6 +20,7 @@ class HipchatNotifierTests(unittest.TestCase):
         self.assert_one_message_posted(hipchatCallsTo(hipchatMock),
                                        Matches(lambda m: m["parameters"]["room_id"] == 123))
 
+
     def test_success_sends_message_describing_passed_commits(self, hipchatMock):
         notifier = HipchatNotifier("token", 123)
 
@@ -66,6 +67,16 @@ class HipchatNotifierTests(unittest.TestCase):
         notifier.announce_step_failure(Mock(), [])
 
         self.assert_one_message_posted(hipchatCallsTo(hipchatMock))
+
+    def test_from_name_must_be_less_than_15_characters(self, hipchatMock):
+        notifier = HipchatNotifier("token", 123)
+
+        notifier.announce_pipeline_success(Mock(), [])
+        notifier.announce_step_failure(Mock(), [])
+
+        calls = hipchatCallsTo(hipchatMock)
+        self.assertLess(len(calls[0][1]["parameters"]["from"]), 15)
+        self.assertLess(len(calls[1][1]["parameters"]["from"]), 15)
 
     def assert_one_message_posted(self, hipchatCalls, matcher=Matches(lambda x: True)):
         self.assertEqual(1, len(hipchatCalls))
