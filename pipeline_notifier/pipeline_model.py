@@ -89,7 +89,7 @@ class Commit:
 
     @property
     def description(self):
-        return "%s on '%s': %s" % (self.author, self.branch, self.message.split("\n")[0])
+        return "%s on %s: %s" % (self.author, self.branch, self.message.split("\n")[0])
 
     @property
     def status(self):

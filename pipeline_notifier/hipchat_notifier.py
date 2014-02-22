@@ -9,14 +9,24 @@ class HipchatNotifier:
         self.hipchatConn.method(url='rooms/message', method='POST', parameters={
             'room_id': self.room_id,
             'from': 'Build Pipeline',
-            'message': 'Build completed, for commits: %s' %
-                       (', '.join(c.description for c in commits))
+            'message_format': 'html',
+            'notify': False,
+            'color': 'green',
+            'message': "Build completed successfully for commits: <ul>%s</ul>" %
+                       (''.join('<li>%s</li>' % c.description for c in commits))
         })
 
     def announce_step_failure(self, step, commits):
+        commitList = "for commits: <ul>%s</ul>" % \
+                     ''.join('<li>%s</li>' % c.description for c in commits)
+
         self.hipchatConn.method(url='rooms/message', method='POST', parameters={
             'room_id': self.room_id,
             'from': 'Build Pipeline',
-            'message': 'Build step %s failed, for commits: %s' %
-                        (step.name, ', '.join(c.description for c in commits))
+            'message_format': 'html',
+            'notify': True,
+            'color': 'red',
+            'message': ("<strong>Build failed</strong> at '%s', " +
+                        "for commits: <ul>%s</ul>") %
+                       (step.name, ''.join('<li>%s</li>' % c.description for c in commits))
         })

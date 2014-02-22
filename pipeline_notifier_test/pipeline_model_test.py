@@ -209,7 +209,7 @@ class CommitTests(unittest.TestCase):
     def test_commit_description_contains_user__branch_and_short_message(self):
         commit = Commit("A User", "master", "My Commit Message\nSome more message", "123qwe")
 
-        self.assertEquals(commit.description, "A User on 'master': My Commit Message")
+        self.assertEquals(commit.description, "A User on master: My Commit Message")
 
     def test_commit_status_contains_user_and_hash(self):
         commit = Commit("A User", "master", "My Commit Message\nSome more message", "123qwe")
