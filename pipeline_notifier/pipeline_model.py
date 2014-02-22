@@ -62,8 +62,9 @@ class BuildStep:
         tested_commits = self.in_progress_commits[:]
         self.in_progress_commits.clear()
 
-        for callback in self.success_callbacks:
-            callback(tested_commits)
+        if len(tested_commits):
+            for callback in self.success_callbacks:
+                callback(tested_commits)
 
     def fail(self):
         tested_commits = self.in_progress_commits[:]

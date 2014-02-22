@@ -33,6 +33,27 @@ class IntegrationTests(unittest.TestCase):
             ]}
         ])
 
+    def test_no_notifications_sent_for_successes_without_commits(self):
+        client = self.buildClient({"PIPELINE_NOTIFIER_PIPELINES": json.dumps([
+            {"name": "Pipeline", "steps": ["Step 1"]},
+        ])})
+
+        self.announceStepStart("Step 1", client)
+        self.announceStepSuccess("Step 1", client)
+
+        self.assertEqual(len(hipchatCallsTo(self.hipchatMock)), 0)
+
+
+    def test_notifications_are_sent_for_failures_even_without_commits(self):
+        client = self.buildClient({"PIPELINE_NOTIFIER_PIPELINES": json.dumps([
+            {"name": "Pipeline", "steps": ["Step 1"]},
+            ])})
+
+        self.announceStepStart("Step 1", client)
+        self.announceStepSuccess("Step 1", client)
+
+        self.assertEqual(len(hipchatCallsTo(self.hipchatMock)), 0)
+
     def test_single_step_pipeline_notifies_successes(self):
         client = self.buildClient({"PIPELINE_NOTIFIER_PIPELINES": json.dumps([
             {"name": "Pipeline", "steps": ["Step 1"]},
