@@ -17,7 +17,7 @@ class HipchatNotifier:
         })
 
     def announce_step_failure(self, step, commits):
-        if (len(commits) > 0):
+        if len(commits) > 0:
             commits = "for commits: <ul>%s</ul>" % \
                          ''.join('<li>%s</li>' % c.description for c in commits)
         else:

@@ -18,6 +18,7 @@ class JenkinsNotification:
         # Need to check both states because of an intermediate 'COMPLETED' state we want to ignore
         self.is_starting = notification_data["build"]["phase"] == "STARTED"
         self.is_finished = notification_data["build"]["phase"] == "FINISHED"
+        self.build_url = notification_data["build"]["full_url"]
 
     def update_pipeline(self, pipeline):
         if self.is_finished:

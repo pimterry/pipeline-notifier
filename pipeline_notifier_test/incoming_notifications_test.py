@@ -89,6 +89,10 @@ class JenkinsNotificationTests(unittest.TestCase):
         notification = JenkinsNotification(self.buildJenkinsNotificationJson("my first step"))
         self.assertEquals(notification.step_name, "my first step")
 
+    def test_notification_parses_build_url(self):
+        notification = JenkinsNotification(self.buildJenkinsNotificationJson("build-step"))
+        self.assertEquals(notification.build_url, "http://jenkins.example.com/job/build-step/5")
+
     def test_notification_updates_passing_pipeline_steps(self):
         jenkins_json = self.buildJenkinsNotificationJson("step1", phase="FINISHED", status="SUCCESS")
         notification = JenkinsNotification(jenkins_json)
@@ -133,16 +137,16 @@ class JenkinsNotificationTests(unittest.TestCase):
 
         self.assertEqual(len(self.pipeline.mock_calls), 0)
 
-    def buildJenkinsNotificationJson(self, stepName, phase = "FINISHED", status = "SUCCESS"):
+    def buildJenkinsNotificationJson(self, step_name, phase = "FINISHED", status = "SUCCESS"):
         return {
-            "name": stepName,
-            "url": "http://jenkins.example.com/" + stepName,
+            "name": step_name,
+            "url": "http://jenkins.example.com/" + step_name,
             "build":{
                 "number": 1,
                 "phase": phase,
                 "status": status,
                 "url": "job/project/5",
-                "full_url": "http://jenkins.example.com/job/project/5",
+                "full_url": "http://jenkins.example.com/job/" + step_name + "/5",
                 "parameters": { "branch": "master" }
             }
         }
